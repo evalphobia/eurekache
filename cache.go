@@ -6,8 +6,8 @@ type cache interface {
 	Get(string, interface{}) bool
 	GetInterface(string) (interface{}, bool)
 	GetGobBytes(string) ([]byte, bool)
-	Set(string, interface{})
-	SetExpire(string, interface{}, int64)
+	Set(string, interface{}) error
+	SetExpire(string, interface{}, int64) error
 }
 
 type Eurekache struct {

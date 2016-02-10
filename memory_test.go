@@ -27,7 +27,7 @@ func TestMemoryCacheTTLGet(t *testing.T) {
 	item := &Item{
 		CreatedAt: 1,
 		ExpiredAt: math.MaxInt64,
-		value:     strValue,
+		Value:     strValue,
 	}
 	m.items["key"] = item
 
@@ -51,7 +51,7 @@ func TestMemoryCacheTTLGetInterface(t *testing.T) {
 	item := &Item{
 		CreatedAt: 1,
 		ExpiredAt: math.MaxInt64,
-		value:     strValue,
+		Value:     strValue,
 	}
 	m.items["key"] = item
 
@@ -77,7 +77,7 @@ func TestMemoryCacheTTLGetGobBytes(t *testing.T) {
 	item := &Item{
 		CreatedAt: 1,
 		ExpiredAt: math.MaxInt64,
-		value:     strValue,
+		Value:     strValue,
 	}
 	m.items["key"] = item
 
@@ -118,7 +118,7 @@ func TestMemoryCacheTTLSet(t *testing.T) {
 	// hit cache
 	item, ok = m.items["key"]
 	assert.True(ok)
-	assert.Equal(strValue, item.value)
+	assert.Equal(strValue, item.Value)
 	assert.EqualValues(math.MaxInt64, item.ExpiredAt)
 }
 
@@ -140,7 +140,7 @@ func TestMemoryCacheTTLSetExpire(t *testing.T) {
 	// hit cache
 	item, ok = m.items["key"]
 	assert.True(ok)
-	assert.Equal(strValue, item.value)
+	assert.Equal(strValue, item.Value)
 
 	expected := item.CreatedAt + 2000*int64(time.Millisecond)
 	assert.EqualValues(expected, item.ExpiredAt)
@@ -186,22 +186,22 @@ func TestMemoryCacheTTLGetNextReplacement(t *testing.T) {
 	m.Set(k1, v1)
 	key, item = m.getNextReplacement()
 	assert.Equal(k1, key, "it shuld be first item")
-	assert.Equal(v1, item.value, "it shuld be first item")
+	assert.Equal(v1, item.Value, "it shuld be first item")
 
 	// maximum slot = 2
 	m = NewMemoryCacheTTL(2)
 	m.Set(k1, v1)
 	key, item = m.getNextReplacement()
 	assert.Equal("", key, "it shuld be new empty item")
-	assert.Nil(item.value, "it shuld be new empty item")
+	assert.Nil(item.Value, "it shuld be new empty item")
 
 	m.Set(k2, v2)
 	key, item = m.getNextReplacement()
 	assert.Equal(k1, key, "it shuld be first item")
-	assert.Equal(v1, item.value, "it shuld be first item")
+	assert.Equal(v1, item.Value, "it shuld be first item")
 
 	m.Set(k3, v3)
 	key, item = m.getNextReplacement()
 	assert.Equal(k2, key, "it shuld be second item")
-	assert.Equal(v2, item.value, "it shuld be second item")
+	assert.Equal(v2, item.Value, "it shuld be second item")
 }

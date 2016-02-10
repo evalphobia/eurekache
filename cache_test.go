@@ -57,7 +57,7 @@ func TestEurekacheGet(t *testing.T) {
 	var valItem1, valItem2 Item
 	var valNonItem *Eurekache
 	valItem1 = Item{
-		value: "val",
+		Value: "val",
 	}
 	m.Set("item", valItem1)
 
@@ -143,7 +143,7 @@ func TestEurekacheSet(t *testing.T) {
 
 	item, ok = m.items["key"]
 	assert.True(ok)
-	assert.Equal(val, item.value)
+	assert.Equal(val, item.Value)
 
 	item, ok = m.items["nokey"]
 	assert.False(ok)
@@ -164,7 +164,7 @@ func TestEurekacheSetExpire(t *testing.T) {
 
 	item, ok = m.items["key"]
 	assert.True(ok)
-	assert.Equal(val, item.value)
+	assert.Equal(val, item.Value)
 	expected := item.CreatedAt + 100*int64(time.Millisecond)
 	assert.EqualValues(expected, item.ExpiredAt)
 
@@ -193,7 +193,7 @@ func TestCopyValue(t *testing.T) {
 		"key2": 100,
 	}
 	valStruct1 = Item{
-		value: "value",
+		Value: "value",
 	}
 
 	// string

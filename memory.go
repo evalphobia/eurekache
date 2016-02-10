@@ -36,7 +36,7 @@ func (m *MemoryCacheTTL) Get(key string, data interface{}) bool {
 	case !m.isValidItem(item):
 		return false
 	default:
-		return copyValue(data, item.value)
+		return copyValue(data, item.Value)
 	}
 }
 
@@ -46,7 +46,7 @@ func (m *MemoryCacheTTL) GetInterface(key string) (interface{}, bool) {
 
 	if item, ok := m.items[key]; ok {
 		if m.isValidItem(item) {
-			return item.value, true
+			return item.Value, true
 		}
 	}
 
@@ -61,7 +61,7 @@ func (m *MemoryCacheTTL) GetGobBytes(key string) ([]byte, bool) {
 		if m.isValidItem(item) {
 			var buf bytes.Buffer
 			enc := gob.NewEncoder(&buf)
-			err := enc.Encode(item.value)
+			err := enc.Encode(item.Value)
 			if err == nil {
 				return buf.Bytes(), true
 			}
@@ -71,14 +71,14 @@ func (m *MemoryCacheTTL) GetGobBytes(key string) ([]byte, bool) {
 	return []byte{}, false
 }
 
-func (m *MemoryCacheTTL) Set(key string, data interface{}) {
-	m.SetExpire(key, data, 0)
+func (m *MemoryCacheTTL) Set(key string, data interface{}) error {
+	return m.SetExpire(key, data, 0)
 }
 
 // ttl=milli second
-func (m *MemoryCacheTTL) SetExpire(key string, data interface{}, ttl int64) {
+func (m *MemoryCacheTTL) SetExpire(key string, data interface{}, ttl int64) error {
 	if key == "" {
-		return
+		return nil
 	}
 
 	m.itemsMu.Lock()
@@ -91,8 +91,9 @@ func (m *MemoryCacheTTL) SetExpire(key string, data interface{}, ttl int64) {
 
 	item.init()
 	item.SetExpire(ttl)
-	item.value = data
+	item.Value = data
 	m.items[key] = item
+	return nil
 }
 
 func (m *MemoryCacheTTL) isValidItem(item *Item) bool {

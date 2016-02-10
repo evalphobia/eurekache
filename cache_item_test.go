@@ -13,7 +13,7 @@ func TestItemInit(t *testing.T) {
 	start := time.Now().UnixNano()
 
 	item := &Item{}
-	item.value = "the value"
+	item.Value = "the value"
 	item.init()
 
 	end := time.Now().UnixNano()
@@ -21,7 +21,7 @@ func TestItemInit(t *testing.T) {
 	assert.True(start < item.CreatedAt)
 	assert.True(item.CreatedAt < end)
 	assert.EqualValues(math.MaxInt64, item.ExpiredAt)
-	assert.Nil(item.value)
+	assert.Nil(item.Value)
 }
 
 func TestItemSetExpire(t *testing.T) {
@@ -31,12 +31,12 @@ func TestItemSetExpire(t *testing.T) {
 	item.SetExpire(0)
 	assert.EqualValues(0, item.ExpiredAt)
 	assert.EqualValues(0, item.CreatedAt)
-	assert.Nil(item.value)
+	assert.Nil(item.Value)
 
 	item.SetExpire(100)
 	assert.EqualValues(100*int64(time.Millisecond), item.ExpiredAt)
 	assert.EqualValues(0, item.CreatedAt)
-	assert.Nil(item.value)
+	assert.Nil(item.Value)
 
 	item.CreatedAt = time.Now().UnixNano()
 	item.SetExpire(100)
