@@ -172,7 +172,16 @@ func TestEurekacheSetExpire(t *testing.T) {
 	assert.False(ok)
 	assert.Nil(item)
 
-	t.Skip("Eurekache.Get() must be implemented")
+	var result string
+	ok = e.Get("key", &result)
+	assert.True(ok)
+	assert.Equal(val, result)
+
+	result = ""
+	time.Sleep(100 * time.Millisecond)
+	ok = e.Get("key", &result)
+	assert.False(ok)
+	assert.Empty(result)
 }
 
 func TestCopyValue(t *testing.T) {

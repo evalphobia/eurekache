@@ -6,18 +6,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/garyburd/redigo/redis"
+	"github.com/stretchr/testify/assert"
 )
 
 var testRedisHost string = "127.0.0.1:6379"
-var testPrefix = "eurekache_"
+var testRedisPrefix = "eurekache_"
 
 func TestNewRedisCache(t *testing.T) {
 	assert := assert.New(t)
 
-	pool := getPool()
+	pool := testGetPool()
 	c := NewRedisCache(pool)
 
 	assert.NotNil(c)
@@ -32,8 +31,8 @@ func TestRedisCacheSetPrefix(t *testing.T) {
 	c := NewRedisCache(nil)
 	assert.Equal(c.prefix, "")
 
-	c.SetPrefix(testPrefix)
-	assert.Equal(c.prefix, testPrefix)
+	c.SetPrefix(testRedisPrefix)
+	assert.Equal(c.prefix, testRedisPrefix)
 }
 
 func TestRedisCacheSelect(t *testing.T) {
@@ -50,13 +49,13 @@ func TestRedisCacheGet(t *testing.T) {
 	assert := assert.New(t)
 	key := "key"
 
-	pool := getPool()
+	pool := testGetPool()
 	c := NewRedisCache(pool)
-	c.SetPrefix(testPrefix)
+	c.SetPrefix(testRedisPrefix)
 
 	// set data
 	b := testGobItem("valueTestRedisCacheGet")
-	_, err := pool.Get().Do("SETEX", testPrefix+key, 300, b)
+	_, err := pool.Get().Do("SETEX", testRedisPrefix+key, 300, b)
 	assert.Nil(err)
 
 	// get data
@@ -70,13 +69,13 @@ func TestRedisCacheGetInterface(t *testing.T) {
 	assert := assert.New(t)
 	key := "key"
 
-	pool := getPool()
+	pool := testGetPool()
 	c := NewRedisCache(pool)
-	c.SetPrefix(testPrefix)
+	c.SetPrefix(testRedisPrefix)
 
 	// set data
 	b := testGobItem("valueTestRedisCacheGetInterface")
-	_, err := pool.Get().Do("SETEX", testPrefix+key, 300, b)
+	_, err := pool.Get().Do("SETEX", testRedisPrefix+key, 300, b)
 	assert.Nil(err)
 
 	// get data
@@ -85,21 +84,21 @@ func TestRedisCacheGetInterface(t *testing.T) {
 	assert.Equal("valueTestRedisCacheGetInterface", v)
 }
 
-func TestRedisCacheGetGobByte(t *testing.T) {
+func TestRedisCacheGetGobBytes(t *testing.T) {
 	assert := assert.New(t)
 	key := "key"
 
-	pool := getPool()
+	pool := testGetPool()
 	c := NewRedisCache(pool)
-	c.SetPrefix(testPrefix)
+	c.SetPrefix(testRedisPrefix)
 
 	// set data
-	b := testGobItem("valueTestRedisCacheGetGobByte")
-	_, err := pool.Get().Do("SETEX", testPrefix+key, 300, b)
+	b := testGobItem("valueTestRedisCacheGetGobBytes")
+	_, err := pool.Get().Do("SETEX", testRedisPrefix+key, 300, b)
 	assert.Nil(err)
 
 	// get data
-	b, ok := c.GetGobByte(key)
+	b, ok := c.GetGobBytes(key)
 	assert.True(ok)
 
 	var result string
@@ -107,22 +106,22 @@ func TestRedisCacheGetGobByte(t *testing.T) {
 	dec := gob.NewDecoder(buf)
 	err = dec.Decode(&result)
 	assert.Nil(err)
-	assert.Equal("valueTestRedisCacheGetGobByte", result)
+	assert.Equal("valueTestRedisCacheGetGobBytes", result)
 }
 
 func TestRedisCacheSet(t *testing.T) {
 	assert := assert.New(t)
 	key := "key"
 
-	pool := getPool()
+	pool := testGetPool()
 	c := NewRedisCache(pool)
-	c.SetPrefix(testPrefix)
+	c.SetPrefix(testRedisPrefix)
 
 	err := c.Set(key, "valueTestRedisCacheSet")
 	assert.Nil(err)
 
 	// get data
-	b, err := pool.Get().Do("GET", testPrefix+key)
+	b, err := pool.Get().Do("GET", testRedisPrefix+key)
 	assert.Nil(err)
 	b, err = redis.Bytes(b, err)
 	assert.Nil(err)
@@ -140,9 +139,9 @@ func TestRedisCacheSetExpire(t *testing.T) {
 	assert := assert.New(t)
 	key := "key"
 
-	pool := getPool()
+	pool := testGetPool()
 	c := NewRedisCache(pool)
-	c.SetPrefix(testPrefix)
+	c.SetPrefix(testRedisPrefix)
 
 	err := c.SetExpire(key, "valueTestRedisCacheSetExpire", 1000)
 	assert.Nil(err)
@@ -163,7 +162,7 @@ func TestRedisCacheSetExpire(t *testing.T) {
 	assert.False(ok)
 }
 
-func getPool() *redis.Pool {
+func testGetPool() *redis.Pool {
 	return &redis.Pool{
 		Dial: func() (redis.Conn, error) {
 			return redis.Dial("tcp", testRedisHost)

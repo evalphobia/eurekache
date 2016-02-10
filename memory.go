@@ -25,27 +25,31 @@ func NewMemoryCacheTTL(max int) *MemoryCacheTTL {
 	}
 }
 
-func (m *MemoryCacheTTL) Get(key string, data interface{}) bool {
-	m.itemsMu.RLock()
-	defer m.itemsMu.RUnlock()
+func (c *MemoryCacheTTL) SetTTL(ttl int64) {
+	c.defaultTTL = ttl
+}
 
-	item, ok := m.items[key]
+func (c *MemoryCacheTTL) Get(key string, data interface{}) bool {
+	c.itemsMu.RLock()
+	defer c.itemsMu.RUnlock()
+
+	item, ok := c.items[key]
 	switch {
 	case !ok:
 		return false
-	case !m.isValidItem(item):
+	case !c.isValidItem(item):
 		return false
 	default:
 		return copyValue(data, item.Value)
 	}
 }
 
-func (m *MemoryCacheTTL) GetInterface(key string) (interface{}, bool) {
-	m.itemsMu.RLock()
-	defer m.itemsMu.RUnlock()
+func (c *MemoryCacheTTL) GetInterface(key string) (interface{}, bool) {
+	c.itemsMu.RLock()
+	defer c.itemsMu.RUnlock()
 
-	if item, ok := m.items[key]; ok {
-		if m.isValidItem(item) {
+	if item, ok := c.items[key]; ok {
+		if c.isValidItem(item) {
 			return item.Value, true
 		}
 	}
@@ -53,12 +57,12 @@ func (m *MemoryCacheTTL) GetInterface(key string) (interface{}, bool) {
 	return nil, false
 }
 
-func (m *MemoryCacheTTL) GetGobBytes(key string) ([]byte, bool) {
-	m.itemsMu.RLock()
-	defer m.itemsMu.RUnlock()
+func (c *MemoryCacheTTL) GetGobBytes(key string) ([]byte, bool) {
+	c.itemsMu.RLock()
+	defer c.itemsMu.RUnlock()
 
-	if item, ok := m.items[key]; ok {
-		if m.isValidItem(item) {
+	if item, ok := c.items[key]; ok {
+		if c.isValidItem(item) {
 			var buf bytes.Buffer
 			enc := gob.NewEncoder(&buf)
 			err := enc.Encode(item.Value)
@@ -71,43 +75,43 @@ func (m *MemoryCacheTTL) GetGobBytes(key string) ([]byte, bool) {
 	return []byte{}, false
 }
 
-func (m *MemoryCacheTTL) Set(key string, data interface{}) error {
-	return m.SetExpire(key, data, 0)
+func (c *MemoryCacheTTL) Set(key string, data interface{}) error {
+	return c.SetExpire(key, data, c.defaultTTL)
 }
 
 // ttl=milli second
-func (m *MemoryCacheTTL) SetExpire(key string, data interface{}, ttl int64) error {
+func (c *MemoryCacheTTL) SetExpire(key string, data interface{}, ttl int64) error {
 	if key == "" {
 		return nil
 	}
 
-	m.itemsMu.Lock()
-	defer m.itemsMu.Unlock()
+	c.itemsMu.Lock()
+	defer c.itemsMu.Unlock()
 
-	replaceKey, item := m.getNextReplacement()
+	replaceKey, item := c.getNextReplacement()
 	if replaceKey != "" {
-		delete(m.items, replaceKey)
+		delete(c.items, replaceKey)
 	}
 
 	item.init()
 	item.SetExpire(ttl)
 	item.Value = data
-	m.items[key] = item
+	c.items[key] = item
 	return nil
 }
 
-func (m *MemoryCacheTTL) isValidItem(item *Item) bool {
+func (c *MemoryCacheTTL) isValidItem(item *Item) bool {
 	return item.ExpiredAt > time.Now().UnixNano()
 }
 
-func (m *MemoryCacheTTL) getNextReplacement() (string, *Item) {
+func (c *MemoryCacheTTL) getNextReplacement() (string, *Item) {
 	now := time.Now().UnixNano()
 
 	var replaceItem *Item
 	var replaceKey string
-	var oldestTime int64 = 0
+	var oldestTime int64
 
-	for key, item := range m.items {
+	for key, item := range c.items {
 		// return expired item
 		if now > item.ExpiredAt {
 			return key, item
@@ -123,7 +127,7 @@ func (m *MemoryCacheTTL) getNextReplacement() (string, *Item) {
 	}
 
 	// return oldest item when the cache reaches maximum size
-	if len(m.items) >= m.maxSize {
+	if len(c.items) >= c.maxSize {
 		return replaceKey, replaceItem
 	}
 

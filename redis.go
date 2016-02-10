@@ -28,6 +28,10 @@ func NewRedisCache(pool *redis.Pool) *RedisCache {
 	}
 }
 
+func (c *RedisCache) SetTTL(ttl int64) {
+	c.defaultTTL = ttl
+}
+
 func (c *RedisCache) SetPrefix(prefix string) {
 	c.prefix = prefix
 }
@@ -37,14 +41,13 @@ func (c *RedisCache) Select(num int) {
 }
 
 func (c *RedisCache) Get(key string, data interface{}) bool {
-	b, ok := c.GetGobByte(key)
+	b, ok := c.GetGobBytes(key)
 	if !ok {
 		return false
 	}
 
 	dec := gob.NewDecoder(bytes.NewBuffer(b))
 	dec.Decode(data)
-
 	return true
 }
 
@@ -57,7 +60,7 @@ func (c *RedisCache) GetInterface(key string) (interface{}, bool) {
 	return item.Value, true
 }
 
-func (c *RedisCache) GetGobByte(key string) ([]byte, bool) {
+func (c *RedisCache) GetGobBytes(key string) ([]byte, bool) {
 	item, ok := c.getGobItem(key)
 	if !ok {
 		return nil, false
