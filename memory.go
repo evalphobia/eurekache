@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+// MemoryCacheTTL is a cache source for on-memory cache
+// When item size reaches maxSize, the item is selected by FIFO or TTL and erased.
 type MemoryCacheTTL struct {
 	itemsMu    sync.RWMutex
 	items      map[string]*Item
@@ -14,6 +16,8 @@ type MemoryCacheTTL struct {
 	defaultTTL int64
 }
 
+// NewMemoryCacheTTL returns initialized MemoryCacheTTL
+// max value limits maximum saved item size.
 func NewMemoryCacheTTL(max int) *MemoryCacheTTL {
 	if max == 0 {
 		return nil
@@ -25,10 +29,13 @@ func NewMemoryCacheTTL(max int) *MemoryCacheTTL {
 	}
 }
 
+// SetTTL sets default TTL (milliseconds)
 func (c *MemoryCacheTTL) SetTTL(ttl int64) {
 	c.defaultTTL = ttl
 }
 
+// Get searches cache on memory by given key and returns flag of cache is existed or not.
+// when cache hit, data is assigned.
 func (c *MemoryCacheTTL) Get(key string, data interface{}) bool {
 	c.itemsMu.RLock()
 	defer c.itemsMu.RUnlock()
@@ -44,6 +51,7 @@ func (c *MemoryCacheTTL) Get(key string, data interface{}) bool {
 	}
 }
 
+// GetInterface searches cache on memory by given key and returns interface value.
 func (c *MemoryCacheTTL) GetInterface(key string) (interface{}, bool) {
 	c.itemsMu.RLock()
 	defer c.itemsMu.RUnlock()
@@ -57,6 +65,7 @@ func (c *MemoryCacheTTL) GetInterface(key string) (interface{}, bool) {
 	return nil, false
 }
 
+// GetGobBytes searches cache on memory by given key and returns gob-encoded value.
 func (c *MemoryCacheTTL) GetGobBytes(key string) ([]byte, bool) {
 	c.itemsMu.RLock()
 	defer c.itemsMu.RUnlock()
@@ -75,11 +84,12 @@ func (c *MemoryCacheTTL) GetGobBytes(key string) ([]byte, bool) {
 	return []byte{}, false
 }
 
+// Set sets data.
 func (c *MemoryCacheTTL) Set(key string, data interface{}) error {
 	return c.SetExpire(key, data, c.defaultTTL)
 }
 
-// ttl=milli second
+// SetExpire sets data with TTL.
 func (c *MemoryCacheTTL) SetExpire(key string, data interface{}, ttl int64) error {
 	if key == "" {
 		return nil
@@ -100,10 +110,13 @@ func (c *MemoryCacheTTL) SetExpire(key string, data interface{}, ttl int64) erro
 	return nil
 }
 
+// isValidItem checks if the item is expired or not
 func (c *MemoryCacheTTL) isValidItem(item *Item) bool {
 	return item.ExpiredAt > time.Now().UnixNano()
 }
 
+// getNextReplacement returns new item.
+// when it reaches maximum item size, any expired item or oldest item is returned.
 func (c *MemoryCacheTTL) getNextReplacement() (string, *Item) {
 	now := time.Now().UnixNano()
 

@@ -5,21 +5,26 @@ import (
 	"time"
 )
 
+// Item contains actual value and meta data for cache.
 type Item struct {
-	// creation time
+	// unix nanosec of creation time
 	CreatedAt int64
+
+	// unix nanosec of expires time
 	ExpiredAt int64
 
-	// The actual item stored in this item.
+	// The actual value stored in this item.
 	Value interface{}
 }
 
+// init initializes Item
 func (i *Item) init() {
 	i.CreatedAt = time.Now().UnixNano()
 	i.ExpiredAt = math.MaxInt64
 	i.Value = nil
 }
 
+// SetExpire updates ExpiredAt from given ttl millisec
 func (i *Item) SetExpire(ttl int64) {
 	if ttl == 0 {
 		return

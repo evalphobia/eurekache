@@ -1,3 +1,4 @@
+// Package eurekache provides fallback cache system with multiple cache source
 package eurekache
 
 import "reflect"
@@ -10,18 +11,23 @@ type cache interface {
 	SetExpire(string, interface{}, int64) error
 }
 
+// Eurekache will contains multiple cache source
 type Eurekache struct {
 	caches []cache
 }
 
+// New returns empty new Eurekache
 func New() *Eurekache {
 	return &Eurekache{}
 }
 
-func (e *Eurekache) SetCacheAlgolithms(caches []cache) {
+// SetCacheSources sets cache sources
+func (e *Eurekache) SetCacheSources(caches []cache) {
 	e.caches = caches
 }
 
+// Get searches cache by given key and returns flag of cache is existed or not.
+// when cache hit, data is assigned.
 func (e *Eurekache) Get(key string, data interface{}) (ok bool) {
 	for _, c := range e.caches {
 		ok = c.Get(key, data)
@@ -32,6 +38,7 @@ func (e *Eurekache) Get(key string, data interface{}) (ok bool) {
 	return
 }
 
+// GetInterface searches cache by given key and returns interface value.
 func (e *Eurekache) GetInterface(key string) (v interface{}, ok bool) {
 	for _, c := range e.caches {
 		v, ok = c.GetInterface(key)
@@ -42,6 +49,7 @@ func (e *Eurekache) GetInterface(key string) (v interface{}, ok bool) {
 	return
 }
 
+// GetGobBytes searches cache by given key and returns gob-encoded value.
 func (e *Eurekache) GetGobBytes(key string) (b []byte, ok bool) {
 	for _, c := range e.caches {
 		b, ok = c.GetGobBytes(key)
@@ -52,18 +60,21 @@ func (e *Eurekache) GetGobBytes(key string) (b []byte, ok bool) {
 	return
 }
 
+// Set sets data into all of cache sources.
 func (e *Eurekache) Set(key string, data interface{}) {
 	for _, c := range e.caches {
 		c.Set(key, data)
 	}
 }
 
+// SetExpire sets data with TTL.
 func (e *Eurekache) SetExpire(key string, data interface{}, ttl int64) {
 	for _, c := range e.caches {
 		c.SetExpire(key, data, ttl)
 	}
 }
 
+// copyValue copies srv value into dst.
 func copyValue(dst, src interface{}) bool {
 	vvDst := reflect.ValueOf(dst)
 	switch {

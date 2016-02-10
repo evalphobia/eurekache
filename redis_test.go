@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testRedisHost string = "127.0.0.1:6379"
+var testRedisHost = "127.0.0.1:6379"
 var testRedisPrefix = "eurekache_"
 
 func TestNewRedisCache(t *testing.T) {
