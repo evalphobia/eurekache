@@ -17,7 +17,7 @@ func TestIntegrationGet(t *testing.T) {
 	rc.SetPrefix(testRedisPrefix)
 
 	e := New()
-	e.SetCacheSources([]cache{mc, rc})
+	e.SetCacheSources([]Cache{mc, rc})
 	e.Set("integration", "TestIntegrationGet")
 
 	var ok bool

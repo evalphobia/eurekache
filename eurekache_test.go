@@ -25,7 +25,7 @@ func TestEurekacheSetCacheSources(t *testing.T) {
 	assert.Empty(e.caches)
 
 	m := NewMemoryCacheTTL(1)
-	e.SetCacheSources([]cache{m})
+	e.SetCacheSources([]Cache{m})
 	assert.Len(e.caches, 1)
 	assert.Equal(m, e.caches[0])
 }
@@ -35,7 +35,7 @@ func TestEurekacheGet(t *testing.T) {
 
 	e := New()
 	m := NewMemoryCacheTTL(1)
-	e.SetCacheSources([]cache{m})
+	e.SetCacheSources([]Cache{m})
 
 	m.Set("key", "value")
 
@@ -85,7 +85,7 @@ func TestEurekacheGetInterface(t *testing.T) {
 
 	e := New()
 	m := NewMemoryCacheTTL(1)
-	e.SetCacheSources([]cache{m})
+	e.SetCacheSources([]Cache{m})
 	m.Set("key", val)
 
 	var result interface{}
@@ -112,7 +112,7 @@ func TestEurekacheGetGobBytes(t *testing.T) {
 
 	e := New()
 	m := NewMemoryCacheTTL(1)
-	e.SetCacheSources([]cache{m})
+	e.SetCacheSources([]Cache{m})
 	m.Set("key", val)
 
 	var b []byte
@@ -135,7 +135,7 @@ func TestEurekacheSet(t *testing.T) {
 
 	e := New()
 	m := NewMemoryCacheTTL(1)
-	e.SetCacheSources([]cache{m})
+	e.SetCacheSources([]Cache{m})
 	e.Set("key", val)
 
 	var item *Item
@@ -156,7 +156,7 @@ func TestEurekacheSetExpire(t *testing.T) {
 
 	e := New()
 	m := NewMemoryCacheTTL(1)
-	e.SetCacheSources([]cache{m})
+	e.SetCacheSources([]Cache{m})
 	e.SetExpire("key", val, 100)
 
 	var item *Item

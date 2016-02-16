@@ -3,7 +3,7 @@ package eurekache
 
 import "reflect"
 
-type cache interface {
+type Cache interface {
 	Get(string, interface{}) bool
 	GetInterface(string) (interface{}, bool)
 	GetGobBytes(string) ([]byte, bool)
@@ -13,7 +13,7 @@ type cache interface {
 
 // Eurekache will contains multiple cache source
 type Eurekache struct {
-	caches []cache
+	caches []Cache
 }
 
 // New returns empty new Eurekache
@@ -22,7 +22,7 @@ func New() *Eurekache {
 }
 
 // SetCacheSources sets cache sources
-func (e *Eurekache) SetCacheSources(caches []cache) {
+func (e *Eurekache) SetCacheSources(caches []Cache) {
 	e.caches = caches
 }
 
