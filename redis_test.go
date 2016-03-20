@@ -63,6 +63,15 @@ func TestRedisCacheGet(t *testing.T) {
 	ok := c.Get(key, &result)
 	assert.True(ok)
 	assert.Equal("valueTestRedisCacheGet", result)
+
+	// nil value
+	b = testGobItem(nil)
+	_, err = pool.Get().Do("SETEX", testRedisPrefix+key, 300, b)
+	assert.Nil(err)
+	var result2 string
+	ok = c.Get(key, &result2)
+	assert.False(ok)
+	assert.Empty(result2)
 }
 
 func TestRedisCacheGetInterface(t *testing.T) {
