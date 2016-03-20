@@ -98,6 +98,11 @@ func (c *MemoryCacheTTL) SetExpire(key string, data interface{}, ttl int64) erro
 	c.itemsMu.Lock()
 	defer c.itemsMu.Unlock()
 
+	if data == nil {
+		delete(c.items, key)
+		return nil
+	}
+
 	replaceKey, item := c.getNextReplacement()
 	if replaceKey != "" {
 		delete(c.items, replaceKey)
@@ -112,6 +117,9 @@ func (c *MemoryCacheTTL) SetExpire(key string, data interface{}, ttl int64) erro
 
 // isValidItem checks if the item is expired or not
 func (c *MemoryCacheTTL) isValidItem(item *Item) bool {
+	if item.Value == nil {
+		return false
+	}
 	return item.ExpiredAt > time.Now().UnixNano()
 }
 

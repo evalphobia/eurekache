@@ -41,6 +41,12 @@ func TestMemoryCacheTTLGet(t *testing.T) {
 	// hit cache
 	ok = m.Get("key", &result)
 	assert.True(ok)
+	assert.Equal(strValue, result)
+
+	// nil value
+	item.Value = nil
+	ok = m.Get("key", &result)
+	assert.False(ok)
 }
 
 func TestMemoryCacheTTLGetInterface(t *testing.T) {
@@ -67,6 +73,12 @@ func TestMemoryCacheTTLGetInterface(t *testing.T) {
 	result, ok = m.GetInterface("key")
 	assert.True(ok)
 	assert.Equal(strValue, result.(string))
+
+	// nil value
+	item.Value = nil
+	result, ok = m.GetInterface("key")
+	assert.False(ok)
+	assert.Nil(result)
 }
 
 func TestMemoryCacheTTLGetGobBytes(t *testing.T) {
@@ -98,6 +110,12 @@ func TestMemoryCacheTTLGetGobBytes(t *testing.T) {
 	var str string
 	dec.Decode(&str)
 	assert.Equal(strValue, str)
+
+	// nil value
+	item.Value = nil
+	b, ok = m.GetGobBytes("key")
+	assert.False(ok)
+	assert.Empty(b)
 }
 
 func TestMemoryCacheTTLSet(t *testing.T) {
@@ -166,6 +184,11 @@ func TestMemoryCacheTTLIsValidItem(t *testing.T) {
 	assert.True(ok)
 
 	time.Sleep(100 * time.Millisecond)
+	ok = m.isValidItem(item)
+	assert.False(ok)
+
+	// nil value
+	m.SetExpire("key", nil, 10000)
 	ok = m.isValidItem(item)
 	assert.False(ok)
 }

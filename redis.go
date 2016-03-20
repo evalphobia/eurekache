@@ -71,7 +71,10 @@ func (c *RedisCache) GetInterface(key string) (interface{}, bool) {
 // GetGobBytes searches cache by given key from redis and returns gob-encoded value.
 func (c *RedisCache) GetGobBytes(key string) ([]byte, bool) {
 	item, ok := c.getGobItem(key)
-	if !ok {
+	switch {
+	case !ok:
+		return nil, false
+	case item.Value == nil:
 		return nil, false
 	}
 
@@ -125,6 +128,11 @@ func (c *RedisCache) SetExpire(key string, data interface{}, ttl int64) error {
 		return err
 	}
 	defer conn.Close()
+
+	if data == nil {
+		_, err = conn.Do("DEL", c.prefix+key)
+		return err
+	}
 
 	item := Item{}
 	item.init()
