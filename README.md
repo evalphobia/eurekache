@@ -1,7 +1,7 @@
 eurekache
 ====
 
-[![Build Status](https://travis-ci.org/evalphobia/eurekache.svg?branch=master)](https://travis-ci.org/evalphobia/eurekache) [![Coverage Status](https://coveralls.io/repos/github/evalphobia/eurekache/badge.svg?branch=feature%2Fcoveralls)](https://coveralls.io/github/evalphobia/eurekache?branch=feature%2Fcoveralls) [![GoDoc](https://godoc.org/github.com/evalphobia/eurekache?status.svg)](https://godoc.org/github.com/evalphobia/eurekache)
+[![Build Status](https://travis-ci.org/evalphobia/eurekache.svg?branch=master)](https://travis-ci.org/evalphobia/eurekache) [![Coverage Status](https://coveralls.io/repos/github/evalphobia/eurekache/badge.svg?branch=feature%2Fcoveralls)](https://coveralls.io/github/evalphobia/eurekache?branch=feature%2Fcoveralls) [![GoDoc](https://godoc.org/github.com/evalphobia/eurekache?status.svg)](https://godoc.org/github.com/evalphobia/eurekache) [![Code Climate](https://codeclimate.com/github/evalphobia/eurekache/badges/gpa.svg)](https://codeclimate.com/github/evalphobia/eurekache)
 
 eurekache is cache library, implementing multiple cache source and fallback system.
 
