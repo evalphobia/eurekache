@@ -1,7 +1,10 @@
 // Package eurekache provides fallback cache system with multiple cache source
 package eurekache
 
-import "reflect"
+import (
+	"reflect"
+	"time"
+)
 
 // Cache is interface for storing data
 type Cache interface {
@@ -14,12 +17,17 @@ type Cache interface {
 
 // Eurekache will contains multiple cache source
 type Eurekache struct {
-	caches []Cache
+	caches       []Cache
+	readTimeout  time.Duration
+	writeTimeout time.Duration
 }
 
 // New returns empty new Eurekache
 func New() *Eurekache {
-	return &Eurekache{}
+	return &Eurekache{
+		readTimeout:  time.Hour,
+		writeTimeout: time.Hour,
+	}
 }
 
 // SetCacheSources sets cache sources
@@ -36,51 +44,132 @@ func (e *Eurekache) AddCacheSource(cache Cache) {
 	e.caches = append(e.caches, cache)
 }
 
+// SetTimeout sets r/w timeout
+func (e *Eurekache) SetTimeout(d time.Duration) {
+	e.readTimeout = d
+	e.writeTimeout = d
+}
+
+// SetReadTimeout sets read timeout
+func (e *Eurekache) SetReadTimeout(d time.Duration) {
+	e.readTimeout = d
+}
+
+// SetWriteTimeout sets write timeout
+func (e *Eurekache) SetWriteTimeout(d time.Duration) {
+	e.writeTimeout = d
+}
+
 // Get searches cache by given key and returns flag of cache is existed or not.
 // when cache hit, data is assigned.
 func (e *Eurekache) Get(key string, data interface{}) (ok bool) {
-	for _, c := range e.caches {
-		ok = c.Get(key, data)
-		if ok {
-			return
+	ch := make(chan bool, 1)
+	// get cache
+	go func() {
+		for _, c := range e.caches {
+			ok = c.Get(key, data)
+			if ok {
+				ch <- true
+				return
+			}
 		}
+		ch <- false
+	}()
+
+	// get cache or timeout
+	select {
+	case <-ch:
+		return
+	case <-time.After(e.readTimeout):
+		return false
 	}
-	return
 }
 
 // GetInterface searches cache by given key and returns interface value.
 func (e *Eurekache) GetInterface(key string) (v interface{}, ok bool) {
-	for _, c := range e.caches {
-		v, ok = c.GetInterface(key)
-		if ok {
-			return
+	ch := make(chan bool, 1)
+	// get cache
+	go func() {
+		for _, c := range e.caches {
+			v, ok = c.GetInterface(key)
+			if ok {
+				ch <- true
+				return
+			}
 		}
+		ch <- false
+	}()
+
+	// get cache or timeout
+	select {
+	case <-ch:
+		return
+	case <-time.After(e.readTimeout):
+		return nil, false
 	}
-	return
 }
 
 // GetGobBytes searches cache by given key and returns gob-encoded value.
 func (e *Eurekache) GetGobBytes(key string) (b []byte, ok bool) {
-	for _, c := range e.caches {
-		b, ok = c.GetGobBytes(key)
-		if ok {
-			return
+	ch := make(chan bool, 1)
+	// get cache
+	go func() {
+		for _, c := range e.caches {
+			b, ok = c.GetGobBytes(key)
+			if ok {
+				ch <- true
+				return
+			}
 		}
+		ch <- false
+	}()
+
+	// get cache or timeout
+	select {
+	case <-ch:
+		return
+	case <-time.After(e.readTimeout):
+		return nil, false
 	}
-	return
 }
 
 // Set sets data into all of cache sources.
 func (e *Eurekache) Set(key string, data interface{}) {
-	for _, c := range e.caches {
-		c.Set(key, data)
+	ch := make(chan bool, 1)
+	// set cache
+	go func() {
+		for _, c := range e.caches {
+			c.Set(key, data)
+		}
+		ch <- true
+	}()
+
+	// set cache or timeout
+	select {
+	case <-ch:
+		return
+	case <-time.After(e.writeTimeout):
+		return
 	}
 }
 
 // SetExpire sets data with TTL.
 func (e *Eurekache) SetExpire(key string, data interface{}, ttl int64) {
-	for _, c := range e.caches {
-		c.SetExpire(key, data, ttl)
+	ch := make(chan bool, 1)
+	// set cache
+	go func() {
+		for _, c := range e.caches {
+			c.SetExpire(key, data, ttl)
+		}
+		ch <- true
+	}()
+
+	// set cache or timeout
+	select {
+	case <-ch:
+		return
+	case <-time.After(e.writeTimeout):
+		return
 	}
 }
 
