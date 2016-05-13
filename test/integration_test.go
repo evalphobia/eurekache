@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/astaxie/beego/cache/redis"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/evalphobia/eurekache"
 	"github.com/evalphobia/eurekache/memorycache"
+	"github.com/evalphobia/eurekache/rediscache"
 	"github.com/evalphobia/eurekache/test/helper"
 )
 
@@ -19,7 +19,7 @@ func TestIntegrationGet(t *testing.T) {
 
 	mc := memorycache.NewCacheTTL(3)
 	mc.SetTTL(200)
-	rc := redis.NewRedisCache(helper.TestGetPool())
+	rc := rediscache.NewRedisCache(helper.TestGetPool())
 	rc.SetTTL(1000)
 	rc.SetPrefix(testRedisPrefix)
 
