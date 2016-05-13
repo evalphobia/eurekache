@@ -1,4 +1,4 @@
-package redis
+package rediscache
 
 import (
 	"bytes"
@@ -135,8 +135,7 @@ func (c *RedisCache) SetExpire(key string, data interface{}, ttl int64) error {
 		return err
 	}
 
-	item := eurekache.Item{}
-	item.Init()
+	item := eurekache.NewItem()
 	item.SetExpire(ttl)
 	item.Value = data
 
