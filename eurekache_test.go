@@ -14,7 +14,7 @@ func TestNew(t *testing.T) {
 	assert.Empty(e.caches)
 }
 
-func TestEurekacheSetCacheSources(t *testing.T) {
+func TestSetCacheSources(t *testing.T) {
 	assert := assert.New(t)
 
 	e := New()
@@ -27,7 +27,26 @@ func TestEurekacheSetCacheSources(t *testing.T) {
 	assert.Equal(m, e.caches[0])
 }
 
-func TestEurekacheGet(t *testing.T) {
+func TestAddCacheSource(t *testing.T) {
+	assert := assert.New(t)
+
+	e := New()
+	e.AddCacheSource(nil)
+	assert.Empty(e.caches)
+
+	m1 := newDummyCache()
+	e.AddCacheSource(m1)
+	assert.Len(e.caches, 1)
+
+	m2 := newDummyCache()
+	e.AddCacheSource(m2)
+	assert.Len(e.caches, 2)
+
+	assert.Equal(m1, e.caches[0])
+	assert.Equal(m2, e.caches[1])
+}
+
+func TestGet(t *testing.T) {
 	assert := assert.New(t)
 
 	e := New()
@@ -41,7 +60,7 @@ func TestEurekacheGet(t *testing.T) {
 	assert.Empty(result)
 }
 
-func TestEurekacheGetInterface(t *testing.T) {
+func TestGetInterface(t *testing.T) {
 	assert := assert.New(t)
 
 	e := New()
@@ -53,7 +72,7 @@ func TestEurekacheGetInterface(t *testing.T) {
 	assert.Empty(result)
 }
 
-func TestEurekacheGetGobBytes(t *testing.T) {
+func TestGetGobBytes(t *testing.T) {
 	assert := assert.New(t)
 
 	e := New()

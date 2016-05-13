@@ -27,7 +27,17 @@ func TestNewRedisCache(t *testing.T) {
 	assert.EqualValues(c.defaultTTL, 0)
 }
 
-func TesSetPrefix(t *testing.T) {
+func TestSetTTL(t *testing.T) {
+	assert := assert.New(t)
+
+	c := NewRedisCache(nil)
+	assert.EqualValues(c.defaultTTL, 0)
+
+	c.SetTTL(100)
+	assert.EqualValues(c.defaultTTL, 100)
+}
+
+func TestSetPrefix(t *testing.T) {
 	assert := assert.New(t)
 
 	c := NewRedisCache(nil)
@@ -37,7 +47,7 @@ func TesSetPrefix(t *testing.T) {
 	assert.Equal(c.prefix, testRedisPrefix)
 }
 
-func TesSelect(t *testing.T) {
+func TestSelect(t *testing.T) {
 	assert := assert.New(t)
 
 	c := NewRedisCache(nil)
@@ -47,7 +57,7 @@ func TesSelect(t *testing.T) {
 	assert.Equal(c.dbno, "1")
 }
 
-func TesGet(t *testing.T) {
+func TestGet(t *testing.T) {
 	assert := assert.New(t)
 	key := "key"
 
@@ -56,7 +66,7 @@ func TesGet(t *testing.T) {
 	c.SetPrefix(testRedisPrefix)
 
 	// set data
-	b := helper.TestGobItem("valueTesGet")
+	b := helper.TestGobItem("valueTestGet")
 	_, err := pool.Get().Do("SETEX", testRedisPrefix+key, 300, b)
 	assert.Nil(err)
 
@@ -64,7 +74,7 @@ func TesGet(t *testing.T) {
 	var result string
 	ok := c.Get(key, &result)
 	assert.True(ok)
-	assert.Equal("valueTesGet", result)
+	assert.Equal("valueTestGet", result)
 
 	// nil value
 	b = helper.TestGobItem(nil)
@@ -76,7 +86,7 @@ func TesGet(t *testing.T) {
 	assert.Empty(result2)
 }
 
-func TesGetInterface(t *testing.T) {
+func TestGetInterface(t *testing.T) {
 	assert := assert.New(t)
 	key := "key"
 
@@ -85,17 +95,17 @@ func TesGetInterface(t *testing.T) {
 	c.SetPrefix(testRedisPrefix)
 
 	// set data
-	b := helper.TestGobItem("valueTesGetInterface")
+	b := helper.TestGobItem("valueTestGetInterface")
 	_, err := pool.Get().Do("SETEX", testRedisPrefix+key, 300, b)
 	assert.Nil(err)
 
 	// get data
 	v, ok := c.GetInterface(key)
 	assert.True(ok)
-	assert.Equal("valueTesGetInterface", v)
+	assert.Equal("valueTestGetInterface", v)
 }
 
-func TesGetGobBytes(t *testing.T) {
+func TestGetGobBytes(t *testing.T) {
 	assert := assert.New(t)
 	key := "key"
 
@@ -104,7 +114,7 @@ func TesGetGobBytes(t *testing.T) {
 	c.SetPrefix(testRedisPrefix)
 
 	// set data
-	b := helper.TestGobItem("valueTesGetGobBytes")
+	b := helper.TestGobItem("valueTestGetGobBytes")
 	_, err := pool.Get().Do("SETEX", testRedisPrefix+key, 300, b)
 	assert.Nil(err)
 
@@ -117,10 +127,10 @@ func TesGetGobBytes(t *testing.T) {
 	dec := gob.NewDecoder(buf)
 	err = dec.Decode(&result)
 	assert.Nil(err)
-	assert.Equal("valueTesGetGobBytes", result)
+	assert.Equal("valueTestGetGobBytes", result)
 }
 
-func TesSet(t *testing.T) {
+func TestSet(t *testing.T) {
 	assert := assert.New(t)
 	key := "key"
 
@@ -128,25 +138,34 @@ func TesSet(t *testing.T) {
 	c := NewRedisCache(pool)
 	c.SetPrefix(testRedisPrefix)
 
-	err := c.Set(key, "valueTesSet")
-	assert.Nil(err)
+	err := c.Set(key, "valueTestSet")
+	assert.NoError(err)
 
 	// get data
 	b, err := pool.Get().Do("GET", testRedisPrefix+key)
-	assert.Nil(err)
+	assert.NoError(err)
 	b, err = redis.Bytes(b, err)
-	assert.Nil(err)
+	assert.NoError(err)
 
 	buf := bytes.NewBuffer(b.([]byte))
 	dec := gob.NewDecoder(buf)
 
 	item := &eurekache.Item{}
 	err = dec.Decode(&item)
-	assert.Nil(err)
-	assert.Equal("valueTesSet", item.Value)
+	assert.NoError(err)
+	assert.Equal("valueTestSet", item.Value)
+
+	// delete data
+	err = c.Set(key, nil)
+	assert.NoError(err)
+
+	b, err = pool.Get().Do("GET", testRedisPrefix+key)
+	assert.NoError(err)
+	assert.Nil(b)
+
 }
 
-func TesSetExpire(t *testing.T) {
+func TestSetExpire(t *testing.T) {
 	assert := assert.New(t)
 	key := "key"
 
@@ -154,7 +173,7 @@ func TesSetExpire(t *testing.T) {
 	c := NewRedisCache(pool)
 	c.SetPrefix(testRedisPrefix)
 
-	err := c.SetExpire(key, "valueTesSetExpire", 1000)
+	err := c.SetExpire(key, "valueTestSetExpire", 1000)
 	assert.Nil(err)
 
 	// get data
@@ -171,4 +190,18 @@ func TesSetExpire(t *testing.T) {
 	time.Sleep(1 * time.Second)
 	ok = c.Get(key, &v)
 	assert.False(ok)
+}
+
+func TestConn(t *testing.T) {
+	assert := assert.New(t)
+
+	c := NewRedisCache(helper.TestGetPool())
+	conn, err := c.conn()
+	assert.NoError(err)
+	assert.NotNil(conn)
+
+	c.pool = nil
+	conn, err = c.conn()
+	assert.Equal(errNilPool, err)
+	assert.Nil(conn)
 }

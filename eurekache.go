@@ -27,6 +27,15 @@ func (e *Eurekache) SetCacheSources(caches []Cache) {
 	e.caches = caches
 }
 
+// AddCacheSource adds cache source
+func (e *Eurekache) AddCacheSource(cache Cache) {
+	if cache == nil {
+		return
+	}
+
+	e.caches = append(e.caches, cache)
+}
+
 // Get searches cache by given key and returns flag of cache is existed or not.
 // when cache hit, data is assigned.
 func (e *Eurekache) Get(key string, data interface{}) (ok bool) {
