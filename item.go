@@ -17,6 +17,13 @@ type Item struct {
 	Value interface{}
 }
 
+// NewItem returns initialized *Item
+func NewItem() *Item {
+	i := &Item{}
+	i.Init()
+	return i
+}
+
 // Init initializes Item
 func (i *Item) Init() {
 	i.CreatedAt = time.Now().UnixNano()

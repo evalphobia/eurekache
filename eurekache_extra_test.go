@@ -9,14 +9,14 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	. "github.com/evalphobia/eurekache"
-	"github.com/evalphobia/eurekache/memory"
+	"github.com/evalphobia/eurekache/memorycache"
 )
 
 func TestExtraEurekacheGet(t *testing.T) {
 	assert := assert.New(t)
 
 	e := New()
-	m := memory.NewMemoryCacheTTL(1)
+	m := memorycache.NewCacheTTL(1)
 	e.SetCacheSources([]Cache{m})
 
 	m.Set("key", "value")
@@ -66,7 +66,7 @@ func TestExtraEurekacheGetInterface(t *testing.T) {
 	val := "value"
 
 	e := New()
-	m := memory.NewMemoryCacheTTL(1)
+	m := memorycache.NewCacheTTL(1)
 	e.SetCacheSources([]Cache{m})
 	m.Set("key", val)
 
@@ -93,7 +93,7 @@ func TestExtraEurekacheGetGobBytes(t *testing.T) {
 	assert.Nil(err)
 
 	e := New()
-	m := memory.NewMemoryCacheTTL(1)
+	m := memorycache.NewCacheTTL(1)
 	e.SetCacheSources([]Cache{m})
 	m.Set("key", val)
 
@@ -116,7 +116,7 @@ func TestExtraEurekacheSet(t *testing.T) {
 	val := "value"
 
 	e := New()
-	m := memory.NewMemoryCacheTTL(1)
+	m := memorycache.NewCacheTTL(1)
 	e.SetCacheSources([]Cache{m})
 	e.Set("key", val)
 
@@ -139,7 +139,7 @@ func TestExtraEurekacheSetExpire(t *testing.T) {
 	val := "value"
 
 	e := New()
-	m := memory.NewMemoryCacheTTL(1)
+	m := memorycache.NewCacheTTL(1)
 	e.SetCacheSources([]Cache{m})
 	e.SetExpire("key", val, 100)
 
