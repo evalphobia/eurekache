@@ -17,8 +17,8 @@ type Item struct {
 	Value interface{}
 }
 
-// init initializes Item
-func (i *Item) init() {
+// Init initializes Item
+func (i *Item) Init() {
 	i.CreatedAt = time.Now().UnixNano()
 	i.ExpiredAt = math.MaxInt64
 	i.Value = nil

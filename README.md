@@ -1,7 +1,7 @@
 eurekache
 ====
 
-[![Build Status](https://travis-ci.org/evalphobia/eurekache.svg?branch=master)](https://travis-ci.org/evalphobia/eurekache) [![Coverage Status](https://coveralls.io/repos/github/evalphobia/eurekache/badge.svg?branch=feature%2Fcoveralls)](https://coveralls.io/github/evalphobia/eurekache?branch=feature%2Fcoveralls) [![GoDoc](https://godoc.org/github.com/evalphobia/eurekache?status.svg)](https://godoc.org/github.com/evalphobia/eurekache) [![Code Climate](https://codeclimate.com/github/evalphobia/eurekache/badges/gpa.svg)](https://codeclimate.com/github/evalphobia/eurekache)
+[![Build Status](https://travis-ci.org/evalphobia/eurekache.svg?branch=master)](https://travis-ci.org/evalphobia/eurekache) [![Coverage Status](https://coveralls.io/repos/github/evalphobia/eurekache/badge.svg?branch=master)](https://coveralls.io/github/evalphobia/eurekache?branch=master) [![GoDoc](https://godoc.org/github.com/evalphobia/eurekache?status.svg)](https://godoc.org/github.com/evalphobia/eurekache) [![Code Climate](https://codeclimate.com/github/evalphobia/eurekache/badges/gpa.svg)](https://codeclimate.com/github/evalphobia/eurekache)
 
 eurekache is cache library, implementing multiple cache source and fallback system.
 
@@ -12,17 +12,11 @@ eurekache is cache library, implementing multiple cache source and fallback syst
     - expire ttl
 - Redis
 
-# Requirements
-
-Depends on the [garyburd/redigo](https://github.com/garyburd/redigo) library for Redis client.
-
-
 # Installation
 
 Install eurekache and required packages using `go get` command:
 
 ```bash
-$ go get github.com/garyburd/redigo
 $ go get github.com/evalphobia/eurekache
 ```
 
@@ -38,7 +32,7 @@ $ go get github.com/evalphobia/eurekache
 maxCacheItemSize := 100 // max allocated caches
 expiredTTL := 5 * 60 * 1000 // 5 minutes (millisecond)
 
-mc := eurekache.NewMemoryCacheTTL(maxCacheItemSize)
+mc := memory.NewMemoryCacheTTL(maxCacheItemSize)
 mc.SetTTL(expiredTTL)
 
 cache := eurekache.New()
@@ -48,19 +42,21 @@ cache.SetCacheSources([]cache{mc})
 ### Redis cache
 
 ```go
+import redigo "garyburd/redigo/redis"
+
 // create redis cache
 redisHost := "127.0.0.1:6379"
 expiredTTL := 5 * 60 * 1000 // 5 minutes (millisecond)
-keyPrefix := "myapp_" // added key prefix before set on redis
+keyPrefix := "myapp:" // added key prefix before set on redis
 dbNumber := 1 // redis db number
 
-pool := &redis.Pool{
-    Dial: func() (redis.Conn, error) {
-        return redis.Dial("tcp", redisHost) 
+pool := &redigo.Pool{
+    Dial: func() (redigo.Conn, error) {
+        return redigo.Dial("tcp", redisHost)
     },
 }
 
-rc := eurekache.NewRedisCache(pool)
+rc := redis.NewRedisCache(pool)
 rc.SetTTL(expiredTTL)
 rc.SetPrefix(keyPrefix)
 rc.Select(dbNumber)
@@ -88,10 +84,10 @@ cache.SetCacheSources([]cache{mc, rc})
 
 // save data to all of caches with default TTL
 // when TTL=0, cache is not expired
-cache.Set("key", "value") 
+cache.Set("key", "value")
 
 // save data and cache lives on 24 hours
-cache.SetExpire("key", "value", 24 * 60 * 60 * 1000) 
+cache.SetExpire("key", "value", 24 * 60 * 60 * 1000)
 ```
 
 Eurekache uses `encoding/gob` internally, you register your own types before use it.
@@ -102,7 +98,7 @@ type MyType struct {
 }
 
 func init() {
-    gob.Register(MyType{})
+    gob.Register(&MyType{})
 }
 ```
 
@@ -117,11 +113,11 @@ var ok bool // is cache existed or not
 
 // pass pointer value; type must be equal
 var stringValue string
-ok = cache.Get("key", &stringValue) 
+ok = cache.Get("key", &stringValue)
 
 // return interface value
 var result interface{}
-result, ok = cache.GetInterface("key") 
+result, ok = cache.GetInterface("key")
 stringValue, ok = result.(string)
 
 // return []byte encoded by gob
@@ -138,7 +134,7 @@ Thanks!
 Before create pull request, check the codes using below commands:
 
 ```bash
-$ go vet 
+$ go vet
 $ gofmt -s -l .
 $ golint
 ```

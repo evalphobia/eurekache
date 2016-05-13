@@ -1,4 +1,4 @@
-package eurekache
+package redis
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/evalphobia/eurekache"
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -89,7 +90,7 @@ func (c *RedisCache) GetGobBytes(key string) ([]byte, bool) {
 }
 
 // getGobItem searches cache by given key from redis and returns Item data
-func (c *RedisCache) getGobItem(key string) (*Item, bool) {
+func (c *RedisCache) getGobItem(key string) (*eurekache.Item, bool) {
 	conn, err := c.conn()
 	if err != nil {
 		return nil, false
@@ -106,7 +107,7 @@ func (c *RedisCache) getGobItem(key string) (*Item, bool) {
 		return nil, false
 	}
 
-	var item Item
+	var item eurekache.Item
 	dec := gob.NewDecoder(bytes.NewBuffer(b))
 	err = dec.Decode(&item)
 	if err != nil {
@@ -134,8 +135,8 @@ func (c *RedisCache) SetExpire(key string, data interface{}, ttl int64) error {
 		return err
 	}
 
-	item := Item{}
-	item.init()
+	item := eurekache.Item{}
+	item.Init()
 	item.SetExpire(ttl)
 	item.Value = data
 
