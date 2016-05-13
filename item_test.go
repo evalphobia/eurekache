@@ -14,7 +14,7 @@ func TestItemInit(t *testing.T) {
 
 	item := &Item{}
 	item.Value = "the value"
-	item.init()
+	item.Init()
 
 	end := time.Now().UnixNano()
 

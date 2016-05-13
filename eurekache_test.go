@@ -1,10 +1,7 @@
 package eurekache
 
 import (
-	"bytes"
-	"encoding/gob"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,7 +21,7 @@ func TestEurekacheSetCacheSources(t *testing.T) {
 	e.SetCacheSources(nil)
 	assert.Empty(e.caches)
 
-	m := NewMemoryCacheTTL(1)
+	m := newDummyCache()
 	e.SetCacheSources([]Cache{m})
 	assert.Len(e.caches, 1)
 	assert.Equal(m, e.caches[0])
@@ -34,154 +31,38 @@ func TestEurekacheGet(t *testing.T) {
 	assert := assert.New(t)
 
 	e := New()
-	m := NewMemoryCacheTTL(1)
+	m := newDummyCache()
 	e.SetCacheSources([]Cache{m})
 
-	m.Set("key", "value")
-
-	var ok bool
-	var valInt int
-	var valStr string
-
-	// int value
-	ok = e.Get("key", &valInt)
+	// dummy
+	var result string
+	ok := e.Get("key", &result)
 	assert.False(ok)
-	assert.Empty(valInt)
-
-	// string value
-	ok = e.Get("key", &valStr)
-	assert.True(ok)
-	assert.Equal("value", valStr)
-
-	// struct value
-	var valItem1, valItem2 Item
-	var valNonItem *Eurekache
-	valItem1 = Item{
-		Value: "val",
-	}
-	m.Set("item", valItem1)
-
-	ok = e.Get("item", valNonItem)
-	assert.False(ok)
-	assert.Nil(valNonItem)
-
-	ok = e.Get("item", &valItem2)
-	assert.True(ok)
-	assert.Equal(valItem1, valItem2)
-
-	// pointer value
-	var valPtr1, valPtr2 *Item
-	m.Set("item_ptr", &valPtr1)
-
-	ok = e.Get("item_ptr", &valPtr2)
-	assert.True(ok)
-	assert.Equal(valPtr1, valPtr2)
-
+	assert.Empty(result)
 }
 
 func TestEurekacheGetInterface(t *testing.T) {
 	assert := assert.New(t)
-	val := "value"
 
 	e := New()
-	m := NewMemoryCacheTTL(1)
+	m := newDummyCache()
 	e.SetCacheSources([]Cache{m})
-	m.Set("key", val)
 
-	var result interface{}
-	var ok bool
-
-	result, ok = e.GetInterface("key")
-	assert.True(ok)
-	assert.Equal(val, result)
-
-	result, ok = e.GetInterface("nokey")
+	result, ok := e.GetInterface("key")
 	assert.False(ok)
-	assert.Nil(result)
+	assert.Empty(result)
 }
 
 func TestEurekacheGetGobBytes(t *testing.T) {
 	assert := assert.New(t)
-	val := "value"
-
-	// encode value
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(val)
-	assert.Nil(err)
 
 	e := New()
-	m := NewMemoryCacheTTL(1)
+	m := newDummyCache()
 	e.SetCacheSources([]Cache{m})
-	m.Set("key", val)
 
-	var b []byte
-	var ok bool
-
-	// check gob encoded result
-	b, ok = e.GetGobBytes("key")
-	assert.True(ok)
-	assert.Equal(buf.Bytes(), b)
-
-	// check gob encoded result
-	b, ok = e.GetGobBytes("nokey")
+	b, ok := e.GetGobBytes("key")
 	assert.False(ok)
 	assert.Empty(b)
-}
-
-func TestEurekacheSet(t *testing.T) {
-	assert := assert.New(t)
-	val := "value"
-
-	e := New()
-	m := NewMemoryCacheTTL(1)
-	e.SetCacheSources([]Cache{m})
-	e.Set("key", val)
-
-	var item *Item
-	var ok bool
-
-	item, ok = m.items["key"]
-	assert.True(ok)
-	assert.Equal(val, item.Value)
-
-	item, ok = m.items["nokey"]
-	assert.False(ok)
-	assert.Nil(item)
-}
-
-func TestEurekacheSetExpire(t *testing.T) {
-	assert := assert.New(t)
-	val := "value"
-
-	e := New()
-	m := NewMemoryCacheTTL(1)
-	e.SetCacheSources([]Cache{m})
-	e.SetExpire("key", val, 100)
-
-	var item *Item
-	var ok bool
-
-	item, ok = m.items["key"]
-	assert.True(ok)
-	assert.Equal(val, item.Value)
-	expected := item.CreatedAt + 100*int64(time.Millisecond)
-	assert.EqualValues(expected, item.ExpiredAt)
-
-	item, ok = m.items["nokey"]
-	assert.False(ok)
-	assert.Nil(item)
-
-	var result string
-	ok = e.Get("key", &result)
-	assert.True(ok)
-	assert.Equal(val, result)
-
-	result = ""
-	time.Sleep(100 * time.Millisecond)
-	ok = e.Get("key", &result)
-	assert.False(ok)
-	assert.Empty(result)
 }
 
 func TestCopyValue(t *testing.T) {
@@ -206,37 +87,63 @@ func TestCopyValue(t *testing.T) {
 	}
 
 	// string
-	ok = copyValue(&valStr2, valStr1)
+	ok = CopyValue(&valStr2, valStr1)
 	assert.True(ok)
 	assert.Equal(valStr1, valStr2)
-	ok = copyValue(&valStr3, &valStr1)
+	ok = CopyValue(&valStr3, &valStr1)
 	assert.Equal(valStr1, valStr3)
 
 	// int
-	ok = copyValue(&valInt2, valInt1)
+	ok = CopyValue(&valInt2, valInt1)
 	assert.True(ok)
 	assert.Equal(valInt1, valInt2)
-	ok = copyValue(&valInt3, &valInt1)
+	ok = CopyValue(&valInt3, &valInt1)
 	assert.Equal(valInt1, valInt3)
 
 	// slice
-	ok = copyValue(&valSlice2, valSlice1)
+	ok = CopyValue(&valSlice2, valSlice1)
 	assert.True(ok)
 	assert.Equal(valSlice1, valSlice2)
-	ok = copyValue(&valSlice3, &valSlice1)
+	ok = CopyValue(&valSlice3, &valSlice1)
 	assert.Equal(valSlice1, valSlice3)
 
 	// map
-	ok = copyValue(&valMap2, valMap1)
+	ok = CopyValue(&valMap2, valMap1)
 	assert.True(ok)
 	assert.Equal(valMap1, valMap2)
-	ok = copyValue(&valMap3, &valMap1)
+	ok = CopyValue(&valMap3, &valMap1)
 	assert.Equal(valMap1, valMap3)
 
 	// struct
-	ok = copyValue(&valStruct2, valStruct1)
+	ok = CopyValue(&valStruct2, valStruct1)
 	assert.True(ok)
 	assert.Equal(valStruct1, valStruct2)
-	ok = copyValue(&valStruct3, &valStruct1)
+	ok = CopyValue(&valStruct3, &valStruct1)
 	assert.Equal(valStruct1, valStruct3)
+}
+
+type dummyCache struct{}
+
+func (d *dummyCache) Get(k string, v interface{}) bool {
+	return false
+}
+
+func (d *dummyCache) GetInterface(k string) (interface{}, bool) {
+	return nil, false
+}
+
+func (d *dummyCache) GetGobBytes(k string) ([]byte, bool) {
+	return nil, false
+}
+
+func (d *dummyCache) Set(k string, v interface{}) error {
+	return nil
+}
+
+func (d *dummyCache) SetExpire(k string, v interface{}, i int64) error {
+	return nil
+}
+
+func newDummyCache() *dummyCache {
+	return &dummyCache{}
 }

@@ -3,6 +3,7 @@ package eurekache
 
 import "reflect"
 
+// Cache is interface for storing data
 type Cache interface {
 	Get(string, interface{}) bool
 	GetInterface(string) (interface{}, bool)
@@ -74,8 +75,8 @@ func (e *Eurekache) SetExpire(key string, data interface{}, ttl int64) {
 	}
 }
 
-// copyValue copies srv value into dst.
-func copyValue(dst, src interface{}) bool {
+// CopyValue copies srv value into dst.
+func CopyValue(dst, src interface{}) bool {
 	vvDst := reflect.ValueOf(dst)
 	switch {
 	case vvDst.Kind() != reflect.Ptr:

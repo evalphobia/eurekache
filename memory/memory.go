@@ -1,17 +1,19 @@
-package eurekache
+package memory
 
 import (
 	"bytes"
 	"encoding/gob"
 	"sync"
 	"time"
+
+	"github.com/evalphobia/eurekache"
 )
 
 // MemoryCacheTTL is a cache source for on-memory cache
 // When item size reaches maxSize, the item is selected by FIFO or TTL and erased.
 type MemoryCacheTTL struct {
 	itemsMu    sync.RWMutex
-	items      map[string]*Item
+	items      map[string]*eurekache.Item
 	maxSize    int
 	defaultTTL int64
 }
@@ -24,7 +26,7 @@ func NewMemoryCacheTTL(max int) *MemoryCacheTTL {
 	}
 
 	return &MemoryCacheTTL{
-		items:   make(map[string]*Item),
+		items:   make(map[string]*eurekache.Item),
 		maxSize: max,
 	}
 }
@@ -47,7 +49,7 @@ func (c *MemoryCacheTTL) Get(key string, data interface{}) bool {
 	case !c.isValidItem(item):
 		return false
 	default:
-		return copyValue(data, item.Value)
+		return eurekache.CopyValue(data, item.Value)
 	}
 }
 
@@ -108,7 +110,7 @@ func (c *MemoryCacheTTL) SetExpire(key string, data interface{}, ttl int64) erro
 		delete(c.items, replaceKey)
 	}
 
-	item.init()
+	item.Init()
 	item.SetExpire(ttl)
 	item.Value = data
 	c.items[key] = item
@@ -116,7 +118,7 @@ func (c *MemoryCacheTTL) SetExpire(key string, data interface{}, ttl int64) erro
 }
 
 // isValidItem checks if the item is expired or not
-func (c *MemoryCacheTTL) isValidItem(item *Item) bool {
+func (c *MemoryCacheTTL) isValidItem(item *eurekache.Item) bool {
 	if item.Value == nil {
 		return false
 	}
@@ -125,10 +127,10 @@ func (c *MemoryCacheTTL) isValidItem(item *Item) bool {
 
 // getNextReplacement returns new item.
 // when it reaches maximum item size, any expired item or oldest item is returned.
-func (c *MemoryCacheTTL) getNextReplacement() (string, *Item) {
+func (c *MemoryCacheTTL) getNextReplacement() (string, *eurekache.Item) {
 	now := time.Now().UnixNano()
 
-	var replaceItem *Item
+	var replaceItem *eurekache.Item
 	var replaceKey string
 	var oldestTime int64
 
@@ -152,5 +154,5 @@ func (c *MemoryCacheTTL) getNextReplacement() (string, *Item) {
 		return replaceKey, replaceItem
 	}
 
-	return "", &Item{}
+	return "", &eurekache.Item{}
 }

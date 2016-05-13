@@ -1,23 +1,30 @@
-package eurekache
+package test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/evalphobia/eurekache"
+	"github.com/evalphobia/eurekache/memory"
+	"github.com/evalphobia/eurekache/redis"
+	"github.com/evalphobia/eurekache/test/helper"
 )
+
+var testRedisPrefix = "eurekache:integration:"
 
 func TestIntegrationGet(t *testing.T) {
 	assert := assert.New(t)
 
-	mc := NewMemoryCacheTTL(3)
+	mc := memory.NewMemoryCacheTTL(3)
 	mc.SetTTL(200)
-	rc := NewRedisCache(testGetPool())
+	rc := redis.NewRedisCache(helper.TestGetPool())
 	rc.SetTTL(1000)
 	rc.SetPrefix(testRedisPrefix)
 
-	e := New()
-	e.SetCacheSources([]Cache{mc, rc})
+	e := eurekache.New()
+	e.SetCacheSources([]eurekache.Cache{mc, rc})
 	e.Set("integration", "TestIntegrationGet")
 
 	var ok bool

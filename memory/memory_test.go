@@ -1,4 +1,4 @@
-package eurekache
+package memory
 
 import (
 	"bytes"
@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/evalphobia/eurekache"
 )
 
 func TestNewMemoryCacheTTL(t *testing.T) {
@@ -24,7 +26,7 @@ func TestMemoryCacheTTLGet(t *testing.T) {
 	m := NewMemoryCacheTTL(1)
 	strValue := "the value"
 
-	item := &Item{
+	item := &eurekache.Item{
 		CreatedAt: 1,
 		ExpiredAt: math.MaxInt64,
 		Value:     strValue,
@@ -54,7 +56,7 @@ func TestMemoryCacheTTLGetInterface(t *testing.T) {
 	m := NewMemoryCacheTTL(1)
 	strValue := "the value"
 
-	item := &Item{
+	item := &eurekache.Item{
 		CreatedAt: 1,
 		ExpiredAt: math.MaxInt64,
 		Value:     strValue,
@@ -86,7 +88,7 @@ func TestMemoryCacheTTLGetGobBytes(t *testing.T) {
 	m := NewMemoryCacheTTL(1)
 	strValue := "the value"
 
-	item := &Item{
+	item := &eurekache.Item{
 		CreatedAt: 1,
 		ExpiredAt: math.MaxInt64,
 		Value:     strValue,
@@ -125,7 +127,7 @@ func TestMemoryCacheTTLSet(t *testing.T) {
 
 	m.Set("key", strValue)
 
-	var item *Item
+	var item *eurekache.Item
 	var ok bool
 
 	// miss cache
@@ -147,7 +149,7 @@ func TestMemoryCacheTTLSetExpire(t *testing.T) {
 
 	m.SetExpire("key", strValue, 2000)
 
-	var item *Item
+	var item *eurekache.Item
 	var ok bool
 
 	// miss cache
@@ -171,7 +173,7 @@ func TestMemoryCacheTTLIsValidItem(t *testing.T) {
 
 	m.SetExpire("key", strValue, 100)
 
-	var item *Item
+	var item *eurekache.Item
 	var ok bool
 	item, ok = m.items["key"]
 	assert.True(ok)
@@ -202,7 +204,7 @@ func TestMemoryCacheTTLGetNextReplacement(t *testing.T) {
 	k3 := "key3"
 	v3 := "value3"
 	var key string
-	var item *Item
+	var item *eurekache.Item
 
 	// maximum slot = 1
 	m := NewMemoryCacheTTL(1)
