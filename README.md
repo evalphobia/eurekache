@@ -33,7 +33,7 @@ $ go get github.com/evalphobia/eurekache
 maxCacheItemSize := 100 // max allocated caches
 expiredTTL := 5 * 60 * 1000 // 5 minutes (millisecond)
 
-mc := memory.NewMemoryCacheTTL(maxCacheItemSize)
+mc := memorycache.NewCacheTTL(maxCacheItemSize)
 mc.SetTTL(expiredTTL)
 
 cache := eurekache.New()
@@ -43,7 +43,7 @@ cache.SetCacheSources([]cache{mc})
 ### Redis cache
 
 ```go
-import redigo "garyburd/redigo/redis"
+import redigo "github.com/garyburd/redigo/redis"
 
 // create redis cache
 redisHost := "127.0.0.1:6379"
@@ -57,7 +57,7 @@ pool := &redigo.Pool{
     },
 }
 
-rc := redis.NewRedisCache(pool)
+rc := rediscache.NewRedisCache(pool)
 rc.SetTTL(expiredTTL)
 rc.SetPrefix(keyPrefix)
 rc.Select(dbNumber)
