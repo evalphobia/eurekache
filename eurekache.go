@@ -173,7 +173,7 @@ func (e *Eurekache) SetExpire(key string, data interface{}, ttl int64) {
 	}
 }
 
-// CopyValue copies srv value into dst.
+// CopyValue copies src value into dst.
 func CopyValue(dst, src interface{}) bool {
 	vvDst := reflect.ValueOf(dst)
 	switch {
