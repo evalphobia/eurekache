@@ -1,8 +1,31 @@
 eurekache
-====
+----
 
-[![Build Status](https://travis-ci.org/evalphobia/eurekache.svg?branch=master)](https://travis-ci.org/evalphobia/eurekache) [![codecov](https://codecov.io/gh/evalphobia/eurekache/branch/master/graph/badge.svg)](https://codecov.io/gh/evalphobia/eurekache)
- [![GoDoc](https://godoc.org/github.com/evalphobia/eurekache?status.svg)](https://godoc.org/github.com/evalphobia/eurekache) [![Code Climate](https://codeclimate.com/github/evalphobia/eurekache/badges/gpa.svg)](https://codeclimate.com/github/evalphobia/eurekache)
+[![GoDoc][1]][2] [![License: MIT][3]][4] [![Release][5]][6] [![Build Status][7]][8] [![Co decov Coverage][11]][12] [![Go Report Card][13]][14] [![Code Climate][19]][20] [![BCH compliance][21]][22]
+
+[1]: https://godoc.org/github.com/evalphobia/eurekache?status.svg
+[2]: https://godoc.org/github.com/evalphobia/eurekache
+[3]: https://img.shields.io/badge/License-MIT-blue.svg
+[4]: LICENSE.md
+[5]: https://img.shields.io/github/release/evalphobia/eurekache.svg
+[6]: https://github.com/evalphobia/eurekache/releases/latest
+[7]: https://travis-ci.org/evalphobia/eurekache.svg?branch=master
+[8]: https://travis-ci.org/evalphobia/eurekache
+[9]: https://coveralls.io/repos/evalphobia/eurekache/badge.svg?branch=master&service=github
+[10]: https://coveralls.io/github/evalphobia/eurekache?branch=master
+[11]: https://codecov.io/github/evalphobia/eurekache/coverage.svg?branch=master
+[12]: https://codecov.io/github/evalphobia/eurekache?branch=master
+[13]: https://goreportcard.com/badge/github.com/evalphobia/eurekache
+[14]: https://goreportcard.com/report/github.com/evalphobia/eurekache
+[15]: https://img.shields.io/github/downloads/evalphobia/eurekache/total.svg?maxAge=1800
+[16]: https://github.com/evalphobia/eurekache/releases
+[17]: https://img.shields.io/github/stars/evalphobia/eurekache.svg
+[18]: https://github.com/evalphobia/eurekache/stargazers
+[19]: https://codeclimate.com/github/evalphobia/eurekache/badges/gpa.svg
+[20]: https://codeclimate.com/github/evalphobia/eurekache
+[21]: https://bettercodehub.com/edge/badge/evalphobia/eurekache?branch=master
+[22]: https://bettercodehub.com/
+
 
 eurekache is cache library, implementing multiple cache source and fallback system.
 
