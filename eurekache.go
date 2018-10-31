@@ -25,6 +25,7 @@ type Eurekache struct {
 // New returns empty new Eurekache
 func New() *Eurekache {
 	return &Eurekache{
+		caches:       []Cache{},
 		readTimeout:  time.Hour,
 		writeTimeout: time.Hour,
 	}
