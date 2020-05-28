@@ -160,6 +160,11 @@ func (c *RedisCache) SetExpire(key string, data interface{}, ttl int64) error {
 	return nil
 }
 
+// Clear does nothing on RedisCache.
+func (c *RedisCache) Clear() error {
+	return nil
+}
+
 // conn returns redis.Conn created from redis.Pool
 func (c *RedisCache) conn() (redis.Conn, error) {
 	if c.pool == nil {
