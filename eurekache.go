@@ -13,6 +13,7 @@ type Cache interface {
 	GetGobBytes(string) ([]byte, bool)
 	Set(string, interface{}) error
 	SetExpire(string, interface{}, int64) error
+	Clear() error
 }
 
 // Eurekache will contains multiple cache source
@@ -171,6 +172,16 @@ func (e *Eurekache) SetExpire(key string, data interface{}, ttl int64) {
 	case <-time.After(e.writeTimeout):
 		return
 	}
+}
+
+// ClearAll deletes all of cached data from cache sorces.
+func (e *Eurekache) ClearAll() error {
+	for _, c := range e.caches {
+		if err := c.Clear(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // CopyValue copies src value into dst.

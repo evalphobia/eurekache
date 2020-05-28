@@ -85,6 +85,43 @@ func TestIntegrationGetTimeout(t *testing.T) {
 	assert.Equal("", result)
 }
 
+func TestIntegrationClear(t *testing.T) {
+	assert := assert.New(t)
+	key := "testintegrationclear"
+	val := "TestIntegrationClear"
+
+	mc := memorycache.NewCacheTTL(3)
+	mc.SetTTL(200)
+	dc := newDummySleepCache(20 * time.Millisecond)
+
+	e := eurekache.New()
+	e.SetCacheSources([]eurekache.Cache{mc, dc})
+	e.Set(key, val)
+
+	var ok bool
+	var result string
+
+	// miss cache
+	ok = e.Get("key", &result)
+	assert.False(ok)
+	assert.Empty(result)
+
+	// hit cache
+	ok = e.Get(key, &result)
+	assert.True(ok)
+	assert.Equal(val, result)
+
+	// clear cache
+	err := e.ClearAll()
+	assert.NoError(err)
+
+	// miss cache
+	result = ""
+	ok = e.Get(key, &result)
+	assert.False(ok)
+	assert.Empty(result)
+}
+
 type dummySleepCache struct {
 	sleep time.Duration
 }
@@ -110,6 +147,11 @@ func (d *dummySleepCache) Set(k string, v interface{}) error {
 }
 
 func (d *dummySleepCache) SetExpire(k string, v interface{}, i int64) error {
+	time.Sleep(d.sleep)
+	return nil
+}
+
+func (d *dummySleepCache) Clear() error {
 	time.Sleep(d.sleep)
 	return nil
 }

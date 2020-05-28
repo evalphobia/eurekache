@@ -11,11 +11,13 @@ import (
 func TestItemInit(t *testing.T) {
 	assert := assert.New(t)
 	start := time.Now().UnixNano()
+	time.Sleep(1)
 
 	item := &Item{}
 	item.Value = "the value"
 	item.Init()
 
+	time.Sleep(1)
 	end := time.Now().UnixNano()
 
 	assert.True(start < item.CreatedAt)

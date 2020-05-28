@@ -202,6 +202,42 @@ func TestDeleteOldest(t *testing.T) {
 	assert.Len(m.deleteQueue, 0)
 }
 
+func TestClear(t *testing.T) {
+	assert := assert.New(t)
+	m := NewCacheTTL(4)
+
+	err := m.Clear()
+	assert.NoError(err)
+
+	// set data
+	m.Set("key1", "value1")
+	m.Set("key2", "value2")
+	m.Set("key3", "value3")
+	m.Set("key4", "value4")
+	assert.Len(m.items, 4)
+	assert.Len(m.deleteQueue, 4)
+	assert.Equal("key1", m.deleteQueue[0])
+
+	// clear
+	err = m.Clear()
+	assert.NoError(err)
+	assert.Len(m.items, 0)
+	assert.Len(m.deleteQueue, 0)
+
+	// set again
+	m.Set("key1", "value1")
+	m.Set("key2", "value2")
+	assert.Len(m.items, 2)
+	assert.Len(m.deleteQueue, 2)
+	assert.Equal("key1", m.deleteQueue[0])
+
+	// clear again
+	err = m.Clear()
+	assert.NoError(err)
+	assert.Len(m.items, 0)
+	assert.Len(m.deleteQueue, 0)
+}
+
 func TestIsValidItem(t *testing.T) {
 	assert := assert.New(t)
 	m := NewCacheTTL(1)

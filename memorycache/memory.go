@@ -120,6 +120,15 @@ func (c *CacheTTL) SetExpire(key string, data interface{}, ttl int64) error {
 	return nil
 }
 
+// Clear deletes all of cached data.
+func (c *CacheTTL) Clear() error {
+	c.itemsMu.Lock()
+	defer c.itemsMu.Unlock()
+	c.items = make(map[string]*eurekache.Item)
+	c.deleteQueue = make([]string, 0, c.maxSize)
+	return nil
+}
+
 func (c *CacheTTL) deleteOldest() {
 	if len(c.deleteQueue) == 0 {
 		return
