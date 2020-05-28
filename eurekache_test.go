@@ -163,6 +163,10 @@ func (d *dummyCache) SetExpire(k string, v interface{}, i int64) error {
 	return nil
 }
 
+func (d *dummyCache) Clear() error {
+	return nil
+}
+
 func newDummyCache() *dummyCache {
 	return &dummyCache{}
 }
